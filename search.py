@@ -115,7 +115,21 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
     frontier = util.Stack()
+
+    
     explored = []
+    return solveProblem(problem, frontier,explored)
+             
+
+def solveProblem(problem,frontier,explored):
+    """
+    Definition that solves a problem with a specific algorithm that depends
+    from its frontier's data structure
+
+    problem - that is the problem to solve
+    frontier - that is the frontier represented in a data structure (Queue or Stack for example)
+    explored - that is an instance of the explored nodes 
+    """
     frontier.push((problem.getStartState(),[]))
     while not frontier.isEmpty():
         current_state,actions= frontier.pop()
@@ -124,14 +138,16 @@ def depthFirstSearch(problem):
         if current_state not in explored:
             explored.append(current_state)
             for ( nextState, action, cost) in problem.expand(current_state):
-                frontier.push((nextState,actions +[action]))          
-
+                frontier.push((nextState,actions +[action])) 
+    return None
 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.Queue()
+    explored=[]
+    return solveProblem(problem, frontier,explored)
 
 def nullHeuristic(state, problem=None):
     """
