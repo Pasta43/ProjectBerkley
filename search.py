@@ -123,8 +123,8 @@ def depthFirstSearch(problem):
             return actions
         if current_state not in explored:
             explored.append(current_state)
-            for action in problem.getActions(current_state):
-                frontier.push((problem.getNextState(current_state,action),actions +[action]))          
+            for ( nextState, action, cost) in problem.expand(current_state):
+                frontier.push((nextState,actions +[action]))          
 
 
 
