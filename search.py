@@ -137,7 +137,7 @@ def solveProblem(problem,frontier,explored):
             return actions
         if current_state not in explored:
             explored.append(current_state)
-            for ( nextState, action, cost) in problem.expand(current_state):
+            for (nextState, action, cost) in problem.expand(current_state):
                 frontier.push((nextState,actions +[action])) 
     return None
 
