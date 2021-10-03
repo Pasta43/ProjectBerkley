@@ -18,7 +18,6 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-from util import Queue
 
 class SearchProblem:
     """
@@ -114,22 +113,18 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    frontier = util.Stack()
-
-    
-    explored = []
-    return solveProblem(problem, frontier,explored)
+    return solveProblem(problem, util.Stack())
              
 
-def solveProblem(problem,frontier,explored):
+def solveProblem(problem,frontier):
     """
     Definition that solves a problem with a specific algorithm that depends
     from its frontier's data structure
 
     problem - that is the problem to solve
     frontier - that is the frontier represented in a data structure (Queue or Stack for example)
-    explored - that is an instance of the explored nodes 
     """
+    explored=[]
     frontier.push((problem.getStartState(),[]))
     while not frontier.isEmpty():
         current_state,actions= frontier.pop()
@@ -138,16 +133,15 @@ def solveProblem(problem,frontier,explored):
         if current_state not in explored:
             explored.append(current_state)
             for (nextState, action, cost) in problem.expand(current_state):
-                frontier.push((nextState,actions +[action])) 
+                node=(nextState,actions +[action])
+                frontier.push(node) 
     return None
 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    frontier = util.Queue()
-    explored=[]
-    return solveProblem(problem, frontier,explored)
+    return solveProblem(problem, util.Queue())
 
 def nullHeuristic(state, problem=None):
     """
@@ -159,7 +153,19 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    explored=[]
+    frontier.push((problem.getStartState(),[],0),0)
+    while not frontier.isEmpty():
+        current_state,actions,cost= frontier.pop()
+        if problem.isGoalState(current_state):
+            return actions
+        if current_state not in explored:
+            explored.append(current_state)
+            for (nextState, action, new_cost) in problem.expand(current_state):
+                g=new_cost+cost
+                f=g+ heuristic(nextState,problem)
+                frontier.push((nextState,actions +[action],g),f) 
 
 
 # Abbreviations
