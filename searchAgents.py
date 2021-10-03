@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+from scipy import special
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -315,32 +316,27 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition,[])
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        node = state[0]
+        visitedCorners = state[1]
+        return len(visitedCorners) == 4
     def expand(self, state):
-        """
-        Returns child states, the actions they require, and a cost of 1.
-
-         As noted in search.py:
-            For a given state, this should return a list of triples, (child,
-            action, stepCost), where 'child' is a child to the current
-            state, 'action' is the action required to get there, and 'stepCost'
-            is the incremental cost of expanding to that child
-        """
+        
+        # Add a child state to the child list if the action is legal
+        # You should call getActions, getActionCost, and getNextState.
+        "*** YOUR CODE HERE ***"
 
         children = []
         for action in self.getActions(state):
-            # Add a child state to the child list if the action is legal
-            # You should call getActions, getActionCost, and getNextState.
-            "*** YOUR CODE HERE ***"
-
+            new_state = self.getNextState(state,action)
+            cost = self.getActionCost(state,action,new_state)
+            children.append((new_state,action,cost))
         self._expanded += 1 # DO NOT CHANGE
         return children
 
@@ -364,12 +360,19 @@ class CornersProblem(search.SearchProblem):
         assert action in self.getActions(state), (
             "Invalid action passed to getActionCost().")
         x, y = state[0]
+        visited_corners=state[1]
         dx, dy = Actions.directionToVector(action)
         nextx, nexty = int(x + dx), int(y + dy)
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if((nextx, nexty) in self.corners and (nextx, nexty) not in visited_corners):
+            #Por cuestiones de referencia en la memoria  en las variables
+            #Se hace esta 'maroma' para evitar el bug de que la lista de esquinas
+            #Visitadas no se comparta en cada nodo explorada  
+            temp_list = list(state[1])   
+            temp_list.append((nextx,nexty))   
+            visited_corners = tuple(temp_list) 
         # you will need to replace the None part of the following tuple.
-        return ((nextx, nexty), None)
+        return ((nextx, nexty), visited_corners)
 
     def getCostOfActionSequence(self, actions):
         """
@@ -402,8 +405,84 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    
+    remainingCorners = [corner for corner in corners if corner not in state[1]]
+    distances = []
+    dist = 0    #the distance that is returned
 
+    for corner in remainingCorners:    #calculate the distances from current pacman position to every corner
+        distances.append(ellipticalDistance(corner,state[0]))
+    for corner in remainingCorners:    #select the corner with the minimum distance from pacman and remove it from the remainingCorners list
+        if ellipticalDistance(corner,state[0]) == min(distances):
+            nextCorner = corner         #the corner with the minimum distance from pacman becomes the next corner
+            dist += ellipticalDistance(corner,state[0])
+            remainingCorners.remove(nextCorner)
+        
+    while len(remainingCorners) > 0:   #while there are more corners to explore
+        distances.clear()
+        for corner in remainingCorners:   #calculate the distances from current corner to every other corner
+            distances.append(ellipticalDistance(corner,nextCorner))
+        for corner in remainingCorners:   #select the corner with the minimum distance from current corner and remove it from the remainingCorners list
+            if ellipticalDistance(corner,nextCorner) == min(distances):
+                dist += ellipticalDistance(corner,nextCorner)
+                nextCorner = corner       #the corner with the minimum distance from current corner becomes the next corner
+                remainingCorners.remove(nextCorner)
+    
+    return dist
+
+    
+
+def ellipticalDistance(actualPosition, destination=(1,1)):
+    """
+    An own heuristic defined for IA class using an ellipse. 
+    This heuristic calculates the curve lenght of a quarter of the curve,
+    where the actualPosition and destination are vertex coordinates of the curve. Taking into account that
+    (x-h)^2     (y-k)^2
+    -------- +  -------- =   1
+       a^2         b^2
+    is the general equation for a ellipse.
+    where 
+
+    a - is the horizontal distance between the center (h, k) and a horizontal vertex
+    b - is the vertical distance between the center (h,k) and a vertical vertex
+      
+
+    This heuristics considers that h,k are 0,0 to put it in the integral to simplify calculations.
+
+    Depending of the actualPosition and the destinations, the calculations of the equation of ellipse will change.
+
+    if the destination is (1,1), it will take into account the upper left side of the ellipse
+    if the destination is (1,right), it will take into account the upper right side of ellipse
+    if the destination is (1,left), it will take into account the lower left side of ellipse
+    if the destination is (left,right), it will take into the lower right side of the ellipse
+
+    Using the Length curve equation, you will get finally:
+
+    L = a E(m)
+
+    where
+    L = is the curve length
+    E (m) = is an order 2 elliptical integral that is calculated  by scipy
+    m = 1- b^2/a^2
+
+    a and b are calculated considering a=abs(x_1-x_2), b= abs(y_1-y_2)
+
+    if a=b you will get an length arc of a circle equal to L=r * pi/2.
+    if a=0 or b=0, the heuristic returns de difference of the value different of zero
+    if both are zero, it means actualPosition = destination and h=0
+    """
+    x1,y1=destination
+    x2,y2=actualPosition
+    a=abs(x1-x2)
+    b=abs(y1-y2)
+    if(a==0 and b==0):
+        return 0
+    if(a==0):
+        return b
+    elif(b==0):
+        return a 
+    else:
+        return a*special.ellipe(1-b**2/a**2)
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
     def __init__(self):
