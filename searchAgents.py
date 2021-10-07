@@ -404,29 +404,37 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
+    """*** YOUR CODE HERE ***
+    
+    Part of the solution taken from https://github.com/alexgian1/Pacman-AI-Project.git
+    """
     
     remainingCorners = [corner for corner in corners if corner not in state[1]]
+
     distances = []
     dist = 0    #the distance that is returned
 
     for corner in remainingCorners:    #calculate the distances from current pacman position to every corner
         distances.append(ellipticalDistance(corner,state[0]))
     for corner in remainingCorners:    #select the corner with the minimum distance from pacman and remove it from the remainingCorners list
-        if ellipticalDistance(corner,state[0]) == min(distances):
+        distance= ellipticalDistance(corner,state[0])
+        if  distance== min(distances):
             nextCorner = corner         #the corner with the minimum distance from pacman becomes the next corner
-            dist += ellipticalDistance(corner,state[0])
+            dist += distance
             remainingCorners.remove(nextCorner)
+            break #in our solution, we add a break to stop the loop when the nearest corner is found
         
     while len(remainingCorners) > 0:   #while there are more corners to explore
         distances.clear()
         for corner in remainingCorners:   #calculate the distances from current corner to every other corner
             distances.append(ellipticalDistance(corner,nextCorner))
         for corner in remainingCorners:   #select the corner with the minimum distance from current corner and remove it from the remainingCorners list
-            if ellipticalDistance(corner,nextCorner) == min(distances):
-                dist += ellipticalDistance(corner,nextCorner)
+            distance=ellipticalDistance(corner,nextCorner)
+            if distance == min(distances):
+                dist += distance
                 nextCorner = corner       #the corner with the minimum distance from current corner becomes the next corner
                 remainingCorners.remove(nextCorner)
+                break
     
     return dist
 
@@ -568,37 +576,27 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchType = FoodSearchProblem
 
 def foodHeuristic(state, problem):
-    """
-    Your heuristic for the FoodSearchProblem goes here.
 
-    This heuristic must be consistent to ensure correctness.  First, try to come
-    up with an admissible heuristic; almost all admissible heuristics will be
-    consistent as well.
-
-    If using A* ever finds a solution that is worse uniform cost search finds,
-    your heuristic is *not* consistent, and probably not admissible!  On the
-    other hand, inadmissible or inconsistent heuristics may find optimal
-    solutions, so be careful.
-
-    The state is a tuple ( pacmanPosition, foodGrid ) where foodGrid is a Grid
-    (see game.py) of either True or False. You can call foodGrid.asList() to get
-    a list of food coordinates instead.
-
-    If you want access to info like walls, capsules, etc., you can query the
-    problem.  For example, problem.walls gives you a Grid of where the walls
-    are.
-
-    If you want to *store* information to be reused in other calls to the
-    heuristic, there is a dictionary called problem.heuristicInfo that you can
-    use. For example, if you only want to count the walls once and store that
-    value, try: problem.heuristicInfo['wallCount'] = problem.walls.count()
-    Subsequent calls to this heuristic can access
-    problem.heuristicInfo['wallCount']
-    """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    distances = []
+    nearestFood = None
+    farthestFood=None
 
+    foodList = foodGrid.asList()
+    if (len(foodList)==0):
+        return 0
+    function = util.manhattanDistance
+    for food in foodList:
+        distance = function(food,position)
+        distances.append(distance)
+    for food in foodList:
+        distance = function(food,position)
+        if distance ==min(distances):
+            nearestFood =food
+        if distance ==max(distances):
+            farthestFood=food
+    return (function(position, nearestFood) + function(nearestFood,farthestFood))
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
@@ -628,7 +626,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.breadthFirstSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -664,7 +662,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return state in self.food.asList()
 
 def mazeDistance(point1, point2, gameState):
     """
