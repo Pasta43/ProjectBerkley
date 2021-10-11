@@ -576,27 +576,60 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchType = FoodSearchProblem
 
 def foodHeuristic(state, problem):
-
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+
+    """
+    We combine :
+    - the food remaining and the distance to eat all the food,
+    - the distance between the nearest food and the farthest
+    """
     distances = []
     nearestFood = None
-    farthestFood=None
+    total = 0
 
     foodList = foodGrid.asList()
-    if (len(foodList)==0):
+    quantity=len(foodList)
+    if (quantity==0):
         return 0
     function = util.manhattanDistance
     for food in foodList:
         distance = function(food,position)
         distances.append(distance)
+    
+    h1=getShortDistance(position,foodList,function,distances) #Fisrt Heuristic
+
+    for food in foodList: #Second heuristic
+        distance = function(food,position)
+        if distance == min(distances):
+            nearestFood = food
+            foodList.remove(nearestFood)
+            total += distance
+            break
+
+    while len(foodList) > 0:  
+        distances.clear()
+        for food in foodList: 
+            distances.append(function(food,nearestFood))
+        for food in foodList: 
+            distance = function(food,nearestFood)
+            if distance == min(distances):
+                total += distance
+                nearestFood = food
+                foodList.remove(nearestFood)
+                break
+    h2= 0.5*total+0.46*quantity
+    h =[h1,h2]
+    return max(h)
+
+def getShortDistance(position,foodList,function,distances):
     for food in foodList:
         distance = function(food,position)
         if distance ==min(distances):
             nearestFood =food
         if distance ==max(distances):
             farthestFood=food
-    return (function(position, nearestFood) + function(nearestFood,farthestFood))
+    return function(position, nearestFood) + function(nearestFood,farthestFood)
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
