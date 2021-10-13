@@ -388,7 +388,7 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 
-def cornersHeuristic(state, problem):
+def cornersHeuristic(state, problem, g = 0):
     """
     A heuristic for the CornersProblem that you defined.
 
@@ -494,7 +494,7 @@ def ellipticalDistance(actualPosition, destination=(1,1)):
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
     def __init__(self):
-        self.searchFunction = lambda prob: search.aStarSearch(prob, cornersHeuristic)
+        self.searchFunction = lambda prob: search.aStarSearch(prob, g)
         self.searchType = CornersProblem
 
 class FoodSearchProblem:
