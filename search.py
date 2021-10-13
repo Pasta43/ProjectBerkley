@@ -143,18 +143,18 @@ def breadthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     return solveProblem(problem, util.Queue())
 
-def nullHeuristic(state, problem=None):
+def nullHeuristic(state, problem = None, g = 0):
     """
     A heuristic function estimates the cost from the current state to the nearest
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
 
-def aStarSearch(problem, heuristic=nullHeuristic):
+def aStarSearch(problem, heuristic = nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     frontier = util.PriorityQueue()
-    explored=[]
+    explored = []
     frontier.push((problem.getStartState(),[],0),0)
     while not frontier.isEmpty():
         current_state,actions,cost= frontier.pop()
@@ -163,9 +163,9 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         if current_state not in explored:
             explored.append(current_state)
             for (nextState, action, new_cost) in problem.expand(current_state):
-                g=new_cost+cost
-                f=g+ heuristic(nextState,problem)
-                frontier.push((nextState,actions +[action],g),f) 
+                g = new_cost + cost
+                f = g + heuristic(nextState, problem, g)
+                frontier.push((nextState,actions + [action], g), f) 
 
 
 # Abbreviations

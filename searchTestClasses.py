@@ -177,7 +177,7 @@ def parseHeuristic(heuristicText):
         state, h = tokens
         heuristic[state] = float(h)
 
-    def graphHeuristic(state, problem=None):
+    def graphHeuristic(state, problem=None, g = 0):
         if state in heuristic:
             return heuristic[state]
         else:

@@ -222,9 +222,20 @@ class PriorityQueueWithFunction(PriorityQueue):
         PriorityQueue.push(self, item, self.priorityFunction(item))
 
 
-def manhattanDistance( xy1, xy2 ):
+# def manhattanDistance(xy1, xy2, cost = 0):
+#     "Returns the Manhattan distance between points xy1 and xy2"
+#     return abs( xy1[0] - xy2[0] ) + abs( xy1[1] - xy2[1] )
+  
+def manhattanDistance(xy1, xy2, cost = 0):
     "Returns the Manhattan distance between points xy1 and xy2"
-    return abs( xy1[0] - xy2[0] ) + abs( xy1[1] - xy2[1] )
+    D = 4
+    h = D * (abs( xy1[0] - xy2[0] ) + abs( xy1[1] - xy2[1] ))
+    # print("H = ", h, " C= ", cost)
+    if h <= cost:
+        return h
+    else :
+        return cost-0.1
+
 def euclideanDistance( xy1, xy2 ):
     "Returns the Manhattan distance between points xy1 and xy2"
     return (( xy1[0] - xy2[0] )**2 + ( xy1[1] - xy2[1] )**2)**(1/2)

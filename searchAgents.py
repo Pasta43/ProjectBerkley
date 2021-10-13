@@ -575,10 +575,9 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
-def foodHeuristic(state, problem):
+def foodHeuristic(state, problem, g = 0):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-
     """
     We combine :
     - the food remaining and the distance to eat all the food,
@@ -589,18 +588,18 @@ def foodHeuristic(state, problem):
     total = 0
 
     foodList = foodGrid.asList()
-    quantity=len(foodList)
-    if (quantity==0):
+    quantity = len(foodList)
+    if (quantity == 0):
         return 0
     function = util.manhattanDistance
     for food in foodList:
-        distance = function(food,position)
+        distance = function(food, position, g)
         distances.append(distance)
     
-    h1=getShortDistance(position,foodList,function,distances) #Fisrt Heuristic
+    h1 = getShortDistance(position,foodList,function,distances,g) #Fisrt Heuristic
 
     for food in foodList: #Second heuristic
-        distance = function(food,position)
+        distance = function(food, position, g)
         if distance == min(distances):
             nearestFood = food
             foodList.remove(nearestFood)
@@ -610,26 +609,26 @@ def foodHeuristic(state, problem):
     while len(foodList) > 0:  
         distances.clear()
         for food in foodList: 
-            distances.append(function(food,nearestFood))
+            distances.append(function(food, nearestFood, g))
         for food in foodList: 
-            distance = function(food,nearestFood)
+            distance = function(food, nearestFood, g)
             if distance == min(distances):
                 total += distance
                 nearestFood = food
                 foodList.remove(nearestFood)
                 break
-    h2= 0.5*total+0.46*quantity
-    h =[h1,h2]
+    h2 = 0.5 * total + 0.46 * quantity
+    h = [h1, h2]
     return max(h)
 
-def getShortDistance(position,foodList,function,distances):
+def getShortDistance(position, foodList, function, distances, g):
     for food in foodList:
-        distance = function(food,position)
-        if distance ==min(distances):
-            nearestFood =food
-        if distance ==max(distances):
-            farthestFood=food
-    return function(position, nearestFood) + function(nearestFood,farthestFood)
+        distance = function(food, position, g)
+        if distance == min(distances):
+            nearestFood = food
+        if distance == max(distances):
+            farthestFood = food
+    return function(position, nearestFood, g) + function(nearestFood, farthestFood, g)
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
